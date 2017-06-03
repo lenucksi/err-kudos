@@ -35,13 +35,13 @@ class Kudos(BotPlugin):
 
             t = msg.frm.room if msg.is_group else msg.frm
             self.send(t,
-                      'kudos updated for {}'.format(username),
+                      'kudos -- {}: {}'.format(username, self.get(username).get('kudos')),
                       in_reply_to=msg,
                       groupchat_nick_reply=True)
 
     @re_botcmd(pattern=r'[\w-]+\-\-', prefixed=False, flags=re.IGNORECASE)
-    def give_kudos(self, msg, match):
-        """This gives kudos"""
+    def remove_kudos(self, msg, match):
+        """This removes kudos"""
         if match:
             line = match.group(0)
             username = line.split(' ')[0].rstrip('--')
@@ -49,7 +49,7 @@ class Kudos(BotPlugin):
 
             t = msg.frm.room if msg.is_group else msg.frm
             self.send(t,
-                      'kudos updated for {}'.format(username),
+                      'kudos -- {}: {}'.format(username, self.get(username).get('kudos')),
                       in_reply_to=msg,
                       groupchat_nick_reply=True)
     
@@ -75,7 +75,7 @@ class Kudos(BotPlugin):
         """Returns a list of users that have a kudo"""
         user_list = []
         for user in self.keys():
-            user_list.append(user)
+            user_list.append('{}:{}'.format(user, self.get(username).get('kudos'))
 
         if user_list == []:
             response = 'No users'
