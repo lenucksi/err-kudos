@@ -3,16 +3,16 @@ from datetime import datetime
 import re
 
 
-class Kudos(BotPlugin):
-    """Plugin to give kudos to an individual"""
+class Karma(BotPlugin):
+    """Plugin to give karma to an individual"""
 
-    def update_kudos(self, username, count=1):
+    def update_karma(self, username, count=1):
         """Updates db with current count"""
 
         username = str(username)
 
         try:
-            current_count = self.get(username).get('kudos', 0)
+            current_count = self.get(username).get('karma', 0)
             new_count = current_count + count
         except AttributeError:
             self[username] = {}
@@ -22,39 +22,39 @@ class Kudos(BotPlugin):
 
         self[username] = {
             'time': datetime.now(),
-            'kudos': new_count,
+            'karma': new_count,
         }
 
     @re_botcmd(pattern=r'[\w-]+\+\+', prefixed=False, flags=re.IGNORECASE)
-    def give_kudos(self, msg, match):
-        """This gives kudos"""
+    def give_karma(self, msg, match):
+        """This gives karma"""
         if match:
             line = match.group(0)
             username = line.split(' ')[0].rstrip('++')
-            self.update_kudos(username)
+            self.update_karma(username)
 
             t = msg.frm.room if msg.is_group else msg.frm
             self.send(t,
-                      'kudos updated for {}'.format(username),
+                      'karma -- {}: {}'.format(username, self.get(username).get('karma')),
                       in_reply_to=msg,
                       groupchat_nick_reply=True)
 
     @re_botcmd(pattern=r'[\w-]+\-\-', prefixed=False, flags=re.IGNORECASE)
-    def remove_kudos(self, msg, match):
-        """This removes kudos"""
+    def remove_karma(self, msg, match):
+        """This removes karma"""
         if match:
             line = match.group(0)
             username = line.split(' ')[0].rstrip('--')
-            self.update_kudos(username, count=-1)
+            self.update_karma(username, count=-1)
 
             t = msg.frm.room if msg.is_group else msg.frm
             self.send(t,
-                      'kudos updated for {}'.format(username),
+                      'karma -- {}: {}'.format(username, self.get(username).get('karma')),
                       in_reply_to=msg,
                       groupchat_nick_reply=True)
     
     @botcmd(admin_only=True)
-    def kudos_delete_entries(self, msg, args):
+    def karma_delete_entries(self, msg, args):
         """Deletes all entries for a user"""
         username = str(args)
 
@@ -71,11 +71,11 @@ class Kudos(BotPlugin):
                   groupchat_nick_reply=True)
 
     @botcmd
-    def kudos_list(self, msg, args):
+    def karma_list(self, msg, args):
         """Returns a list of users that have a kudo"""
         user_list = []
         for user in self.keys():
-            user_list.append(user)
+            user_list.append('{}:{}'.format(user, self.get(user).get('karma')))
 
         if user_list == []:
             response = 'No users'
@@ -89,10 +89,10 @@ class Kudos(BotPlugin):
                   groupchat_nick_reply=True)
 
     @botcmd
-    def kudos(self, msg, args):
-        """A way to see your kudos stats
+    def karma(self, msg, args):
+        """A way to see your karma stats
             Example:
-                !kudos <username>
+                !karma <username>
         """
         username = str(args)
 
@@ -105,7 +105,7 @@ class Kudos(BotPlugin):
             return
 
         try:
-            count = self.get(username).get('kudos')
+            count = self.get(username).get('karma')
         except (TypeError, NameError, AttributeError):
             count = 0
 
